@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: albertohco/econtro:v${{ github.run_number }}
+          tags: albertohco/encontro:v${{ github.run_number }}
           file: ./02-encontros-tech/Dockerfile
           context: ./02-encontros-tech
 
