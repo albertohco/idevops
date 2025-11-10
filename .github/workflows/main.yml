@@ -40,10 +40,37 @@ jobs:
           file: ./02-encontros-tech/Dockerfile
           context: ./02-encontros-tech
 
-  CD:
+  CD-prd:
     runs-on: ubuntu-latest
+    environment: prd
     needs: [CI]
     steps:
       - run: echo "obter o codigo"
       - run: echo "Configurar o Kubeconfig"
       - run: echo "Fazer o apply do kubernetes"
+
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set context
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Create namespace if not exists
+        run: kubectl create namespace producao --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create secrets in producao
+        run: |
+          kubectl create secret generic encontros-tech-secrets \
+          --from-literal=DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+          --namespace=producao \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Deploy to Kubernetes cluster
+        uses: Azure/k8s-deploy@v1
+        with:
+          manifests: |
+            ./02-encontros-tech/k8s/manifesto.yaml
+          images: |
+            albertohco/encontro:v${{ github.run_number }}

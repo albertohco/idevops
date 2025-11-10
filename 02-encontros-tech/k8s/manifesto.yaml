@@ -21,7 +21,10 @@ spec:
             - containerPort: 8000
           env:
             - name: DATABASE_URL
-              value: "postgresql://doadmin:senha@usuario-banco-gerenciado-do-postgres-do-planet-scale:25060/nome-do-banco?sslmode=require"
+              valueFrom:
+                secretKeyRef:
+                name: encontros-tech-secrets
+                key: DATABASE_URL
             - name: APP_TITLE
               value: "Encontros Tech"
             - name: DEBUG
